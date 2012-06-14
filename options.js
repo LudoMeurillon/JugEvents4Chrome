@@ -23,6 +23,7 @@ options.localStorage={};
 options.localStorage.jugnameid = "event.jugname";
 options.localStorage.eventid = "event.id";
 options.localStorage.incrits = "event.inscrits";
+options.localStorage.title = "event.title";
 
 options.showAndHide = function(selector, timeout, message){
 	$(selector).html("");
@@ -69,6 +70,21 @@ options.restore = function(){
 		$('#updatestatsbutton').removeClass('disabled');
 	}else{
 		$('#updatestatsbutton').addClass('disabled');
+	}
+	
+	var nbParticipants = localStorage[options.localStorage.incrits];
+	if(nbParticipants){
+		$('#nbparticipants').show();
+		$('#nbparticipants').text(nbParticipants);
+	}else{
+		$('#nbparticipants').hide();
+	}
+	
+	var title = localStorage[options.localStorage.title];
+	if(title){
+		$('#eventtitle').text(title);
+	}else{
+		$('#eventtitle').text("");
 	}
 }
 

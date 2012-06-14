@@ -30,14 +30,18 @@
 				<label for="id" class="control-label">Evènement Suivi</label>
 				<div class="controls">
 					<input id="id" type="text" class="input-small" placeholder="46430"></input>
-					<span id="event">
-						<a id="details" href="http://www.jugevents.org/" target="_blank">Details</a>
-						<a id="participants" href="http://www.jugevents.org/" target="_blank">Participants</a>
-					</span>
 					<p class="help-block">
 						<span id="identifianttooltip" class="badge" rel="tooltip" title="Pour retourver cet identifiant, allez sur la page de l'évènement dans jugevents.org et récupérez le numéro en fin d'URL">Identifiant <i class="icon-question-sign  icon-white"></i></span> 
 					de l'évènement sur jugevents. Renseigner ce champ permet de voir en temps réel le nombre d'inscrits à cet évènement
 					</p>
+					<blockquote class="well" id="event">
+						<p id="eventtitle"></p>
+						<small id="eventspeakers">Someone famous speaker</small>
+						<span>
+							<span><a id="details" href="http://www.jugevents.org/" target="_blank">Details</a></span>
+							- <a id="participants" href="http://www.jugevents.org/" target="_blank">Participants</a></span> <span id="nbparticipants" class="label label-success"></span> 
+						</span>
+					</blockquote>
 				</div>
 				
 			</div>
@@ -91,7 +95,7 @@
 					<h3><i class="icon-tasks"></i> Téléchargement des données depuis http://jugevents.org</h3>
 				</div>
 				<div class="modal-body">
-					<div id="progress" class="progress progress-striped active">
+					<div id="progress" class="progress progress-striped progress-success active">
 						<div id="progressbar" class="bar" style="width:0%;"></div>
 					</div>
 				</div>
