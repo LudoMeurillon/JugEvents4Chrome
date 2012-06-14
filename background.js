@@ -6,6 +6,7 @@ background.url = "http://www.jugevents.org/jugevents/event/showParticipants.html
 background.eventId 	= "event.id";
 background.inscritsId = "event.inscrits";
 background.titleId = "event.title";
+background.descId = "event.desc";
 background.currentTask;
 
 background.start = function(){
@@ -57,6 +58,13 @@ background.check = function(){
 				title = matches[0].replace('<div class="eventTitle">','').replace('</div>','');
 			}
 			localStorage[background.titleId]=title;
+			
+			var matches = xhr2.responseText.match(/<div.class=.preview.>.*<.div>/mgi);
+			var desc;
+			if(matches){
+				desc = matches[0].replace('<div class="preview">','').replace('</div>','');
+			}
+			localStorage[background.descId]=desc;
 		  }
 		}
 		xhr2.open("GET", background.eventurl+id, false);

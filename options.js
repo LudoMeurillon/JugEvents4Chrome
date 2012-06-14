@@ -24,6 +24,7 @@ options.localStorage.jugnameid = "event.jugname";
 options.localStorage.eventid = "event.id";
 options.localStorage.incrits = "event.inscrits";
 options.localStorage.title = "event.title";
+options.localStorage.desc = "event.desc";
 
 options.showAndHide = function(selector, timeout, message){
 	$(selector).html("");
@@ -58,7 +59,7 @@ options.restore = function(){
 	if(eventid){
 		$('#event').show();
 		$('#details').attr("href",options.http.JUGEVENTS_ROOT_URL+eventid);
-		$('#participants').attr("href",options.http.SHOW_PARTICIPANTS_URLSHOW_PARTICIPANTS_URL+eventid);
+		$('#participants').attr("href",options.http.SHOW_PARTICIPANTS_URL+eventid);
 	}else{
 		$('#event').hide();
 	}
@@ -83,6 +84,7 @@ options.restore = function(){
 	var title = localStorage[options.localStorage.title];
 	if(title){
 		$('#eventtitle').text(title);
+		$('#details').popover({placement:'bottom', title:title, content:localStorage[options.localStorage.desc]});
 	}else{
 		$('#eventtitle').text("");
 	}
@@ -90,6 +92,7 @@ options.restore = function(){
 
 options.refreshEvents = function(){
 	setTimeout(function(){
+		$('#updatestatsbutton').button('loading');
 		/*
 		var eventsUrls = JUGEVENTS_ROOT_URL+"json.html?jugName="+jugname+"&pastEvents=true&order=desc";
 		*/
@@ -101,11 +104,7 @@ options.refreshEvents = function(){
 			  if (xhr.readyState == 4) {
 				if(xhr.responseXML){
 					var events = xhr.responseXML.getElementsByTagName('row');
-					$('#chart').hide();
-					$('#progressModal').modal();
-					
-					var progressStep = 100 / events.length;
-					$('#progressbar').width("0%");
+					//$('#chart').hide();
 					
 					var nbEvents = events.length;
 					
@@ -125,7 +124,7 @@ options.refreshEvents = function(){
 								var startDate = eventRow.childNodes[5].childNodes[0].nodeValue.trim();
 								var nbParticipants = parseInt(eventRow.childNodes[7].childNodes[0].nodeValue.trim());
 								console.log("addind event : title = "+title+" date = "+startDate+", nb="+nbParticipants);
-								addEvent(startDate, title, nbParticipants, progressStep);
+								addEvent(startDate, title, nbParticipants);
 							}
 						}
 					});
@@ -149,26 +148,16 @@ options.refreshEvents = function(){
 	},10);
 }
 
-options.progress = function(increment){
-	var progresstest = document.getElementById('progressbar');
-	var widthtext = progresstest.style.width;
-	var width = parseInt(widthtext.replace('%',''));
-	progresstest.style.width=(width+Math.round(increment))+"%";
-}
-
-options.addEventAndRefresh = function(date, title, nb, increment){
+options.addEventAndRefresh = function(date, title, nb){
 	jugevents.indexedDB.addEvent(date, title, nb, function(){
-		options.progress(increment);
 		console.log("Refreshing chart");
-		$('#progressModal').modal('hide');
+		$('#updatestatsbutton').button('reset');
 		options.loadEvents();
 	});
 }
 
-options.addEvent = function(date, title, nb, increment){
-	jugevents.indexedDB.addEvent(date, title, nb, function(){
-		options.progress(increment);
-	});
+options.addEvent = function(date, title, nb){
+	jugevents.indexedDB.addEvent(date, title, nb);
 }
 
 options.loadEvents = function(){
@@ -184,7 +173,7 @@ options.loadEvents = function(){
 			var dateFields = event.date.split('/');
 			var relativeYearText = dateFields[2];
 			var year 	= parseInt(relativeYearText,10)+2000;
-			var month 	= dateFields[1];
+			var month 	= parseInt(dateFields[1], 10)-1;
 			var day 	= dateFields[0];
 			var date 	= new Date(year, month, day);
 			console.debug("Translated "+event.date+" to "+date+" with values relativeYear="+relativeYearText+" year="+year+" month="+month+" day="+day);
@@ -204,15 +193,21 @@ options.drawChart = function(chartdata, values){
 	$('#maxparticipants').text(Math.max.apply( Math, values));
 	$('#minparticipants').text(Math.min.apply( Math, values));
 	$('#avgparticipants').text(options.Math.avg(values));
-	$('#chart').show();
-	var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
-	chart.draw(chartdata, {'colors': ['green'], fill:30, displayAnnotations: true, displayZoomButtons:false});
+	//$('#chart').show();
+	if(!options.chart){
+		options.chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
+	}
+	options.chart.draw(chartdata, {'colors': ['green'], fill:30, displayAnnotations: true, displayZoomButtons:false});
+}
+
+options.show = function(pane){
+	$('#menu a[href="#'+pane+'"]').tab('show');
 }
 
 options.onLoad = function(){
 	jugevents.indexedDB.onOpen = options.loadEvents;
 	jugevents.indexedDB.open();
+	options.show('optionspane');
 	$('*[rel="tooltip"]').tooltip();
-	$('.modal').modal('hide');
 	options.restore();
 }
