@@ -1,0 +1,17 @@
+﻿{
+  "name": "Jugevents",
+  "version": "1.0",
+  "description": "Gestion des inscrits dans un evenement de JUG",
+  "browser_action": {
+    "name": "JugEvents",
+	"default_icon": "logo.jpeg"
+  },
+  "icons": {
+	"128" : "logo.jpeg"
+  },
+  "background": {
+	"scripts":["background.js"]
+  },
+  "options_page": "options.html",
+  "permissions": ["tabs", "http://*.jugevents.org/*"]
+}

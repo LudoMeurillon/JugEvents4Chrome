@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
+	<script type='text/javascript' src="jugevents.js"></script>
+	<script type='text/javascript' src="options.js"></script>
+
+	<script type='text/javascript' src="bootstrap/js/jquery.js"></script>
+	<script type='text/javascript' src="bootstrap/js/bootstrap.js"></script>
+	<script type='text/javascript' src="bootstrap/js/bootstrap-modal.js"></script>
+	<script type='text/javascript' src="bootstrap/js/bootstrap-tooltip.js"></script>
+	
+	<script type='text/javascript'>
+		google.load('visualization', '1', {'packages':['annotatedtimeline']});
+	</script>
+
+	<body onload="options.onLoad();">
+		<div id="options" class="well form-horizontal">
+			<div class="page-header">
+			  <h1>Options</h1>
+			</div>
+			<div class="control-group">
+				<label for="jugName" class="control-label">JUG</label>
+				<div class="controls">
+					<input class="input-small" id="jugName" type="text" placeholder="Alpes JUG"></input>
+					<p class="help-block"><span id="nomtooltip" class="badge" rel="tooltip" title="La casse n'est pas importante mais les espaces le sont">Nom <i class="icon-question-sign icon-white"></i></span> du JUG sur jugevents</p>
+				</div>
+			</div>
+			<div class="control-group">
+				<label for="id" class="control-label">Evènement Suivi</label>
+				<div class="controls">
+					<input id="id" type="text" class="input-small" placeholder="46430"></input>
+					<span id="event">
+						<a id="details" href="http://www.jugevents.org/" target="_blank">Details</a>
+						<a id="participants" href="http://www.jugevents.org/" target="_blank">Participants</a>
+					</span>
+					<p class="help-block">
+						<span id="identifianttooltip" class="badge" rel="tooltip" title="Pour retourver cet identifiant, allez sur la page de l'évènement dans jugevents.org et récupérez le numéro en fin d'URL">Identifiant <i class="icon-question-sign  icon-white"></i></span> 
+					de l'évènement sur jugevents. Renseigner ce champ permet de voir en temps réel le nombre d'inscrits à cet évènement
+					</p>
+				</div>
+				
+			</div>
+			<div class="control-group">
+				<div class="controls">
+					<div>
+						<button onclick="options.save();" class='btn btn-large btn-success'>Save Options </button>
+						<span id="saved" style="display:none;" class="label label-success"/>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="stats" class="well">
+			<div class="page-header">
+			  <h1>Statistiques du JUG <button id="updatestatsbutton" onclick="options.refreshEvents();" class='btn btn-primary' rel="tooltip" title="Mettre à jour avec les dernières données disponibles sur jugevents.org"><i class="icon-refresh icon-white"></i> Mettre à jour</button></h1>
+			</div>
+			<div class="container-fluid">
+				<div class="row">
+					<div id="errorPanel" class="span8"></div>
+					<div id="errorPanel2" class="span4"></div>
+				</div>
+			</div>
+			<div id="chart">
+				<div>
+					<div id='chart_div' style='width: 1200px; height: 400px;'></div>
+					<div id="statistics" class="container-fluid">
+						<!--
+						<div class="row">
+							<div class="span1">Moyenne</div>
+							<div class="span2"><span id="avgparticipants" class="badge badge-info"></span></div>
+						</div>
+						-->
+						<div class="row">
+							<div class="span1">Médiane</div>
+							<div class="span2"><span id="medparticipants" class="badge badge-info"></span></div>
+						</div>
+						<div class="row">
+							<div class="span1">Max</div>
+							<div class="span2"><span id="maxparticipants" class="badge badge-success"></span></div>
+						</div>
+						<div class="row">
+							<div class="span1">Min</div>
+							<div class="span2"><span id="minparticipants" class="badge badge-important"></span></div>
+						</div>
+					</div>
+				</div>
+				
+			</div>
+			<div class="modal hide" id="progressModal">
+				<div class="modal-header">
+					<h3><i class="icon-tasks"></i> Téléchargement des données depuis http://jugevents.org</h3>
+				</div>
+				<div class="modal-body">
+					<div id="progress" class="progress progress-striped active">
+						<div id="progressbar" class="bar" style="width:0%;"></div>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+	</body>
+</html>
