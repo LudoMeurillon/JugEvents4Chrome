@@ -1,0 +1,22 @@
+.event-annotation{
+	border:none;
+	opacity: 0;
+	cursor: pointer;
+	width: 32px !important;
+	height: 32px !important;
+	margin-left:-10px;
+}
+
+.normal{
+	margin-left:-8px;
+	text-align:center;
+	-webkit-transform: rotateZ(0deg);
+	-webkit-transition: -webkit-transform 0.5s ease-in-out;
+}
+
+.returned{
+	margin-left:-8px;
+	text-align:center;
+	-webkit-transform: rotateZ(360deg);
+	-webkit-transition: -webkit-transform 0.5s ease-in-out;
+}

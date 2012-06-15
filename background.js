@@ -44,6 +44,9 @@ background.check = function(){
 			}
 			localStorage[background.inscritsId]=inscrits;
 			background.updateBadge();
+			chrome.extension.sendRequest({action: "eventUpdated"}, function(response) {
+			  console.log("Event updated for all extension");
+			});
 		  }
 		}
 		xhr.open("GET", background.url+id, false);
@@ -75,10 +78,13 @@ background.check = function(){
 }
 
 background.onRequestReceived = function(request, sender, sendResponse){
-	if (request.action == "update"){
-		background.stop();
-		background.check();
-		background.start();
+	if (request.action == "optionsSaved"){
+		console.log("Received an update on options");
+		setTimeout(function(){
+			background.stop();
+			background.check();
+			background.start();
+		},10);
 	}
 	sendResponse();
 }

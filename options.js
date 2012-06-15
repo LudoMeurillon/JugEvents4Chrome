@@ -12,7 +12,9 @@ options.Math.median = function (values) {
 }
 
 options.Math.avg = function (values) {
-	return "N/A";
+	var sum = 0;
+	values.forEach(function(v){sum=sum+v});
+	return Math.round(sum/values.length);
 }
 
 options.http = {};
@@ -20,11 +22,11 @@ options.http.JUGEVENTS_ROOT_URL = "http://www.jugevents.org/jugevents/event/";
 options.http.SHOW_PARTICIPANTS_URL = options.http.JUGEVENTS_ROOT_URL+"showParticipants.html?id=";
 
 options.localStorage={};
-options.localStorage.jugnameid = "event.jugname";
-options.localStorage.eventid = "event.id";
-options.localStorage.incrits = "event.inscrits";
-options.localStorage.title = "event.title";
-options.localStorage.desc = "event.desc";
+options.localStorage.jugnameid 	= "event.jugname";
+options.localStorage.eventid 	= "event.id";
+options.localStorage.incrits 	= "event.inscrits";
+options.localStorage.title 		= "event.title";
+options.localStorage.desc 		= "event.desc";
 
 options.showAndHide = function(selector, timeout, message){
 	$(selector).html("");
@@ -44,47 +46,66 @@ options.store = function (storageid, input){
 }
 
 options.save = function(){
-	options.store(options.localStorage.eventid,'id');
+	if(localStorage[options.localStorage.eventid] != $("#id").val()){
+		options.store(options.localStorage.eventid,'id');
+		localStorage.removeItem(options.localStorage.title);
+		localStorage.removeItem(options.localStorage.desc);
+		localStorage.removeItem(options.localStorage.incrits);
+	}
+	
 	options.store(options.localStorage.jugnameid,'jugName');
-	chrome.extension.sendRequest({action: "update"}, function(response) {
+	chrome.extension.sendRequest({action: "optionsSaved"}, function(response) {
 	  console.log("call to background.js done");
 	});
 	options.restore();
 	options.showAndHide('#saved', 2000, "Options saved !");
 }
 
-options.restore = function(){
+options.restore = function(initFields){
 	var eventid = localStorage[options.localStorage.eventid];
-	var text = $('#id').val(eventid);
+	if(initFields){
+		$('#id').val(eventid);
+	}
 	if(eventid){
-		$('#event').show();
+		$('#detailsEvent').show();
 		$('#details').attr("href",options.http.JUGEVENTS_ROOT_URL+eventid);
 		$('#participants').attr("href",options.http.SHOW_PARTICIPANTS_URL+eventid);
 	}else{
-		$('#event').hide();
+		$('#detailsEvent').hide();
 	}
 	
 	var jugName = localStorage[options.localStorage.jugnameid];
-	$('#jugName').val(jugName);
-	if(jugName && jugName.trim() != ""){
-		$('#stats').show();
-		$('#updatestatsbutton').removeClass('disabled');
-	}else{
-		$('#updatestatsbutton').addClass('disabled');
+	console.log("Found jugname="+jugName+" in localStorage");
+	if(initFields && $('#jugName').val() != jugName && !$('#jugName').is(":focus")){
+		$('#jugName').val(jugName);
+		if(jugName && jugName.trim() != ""){
+			$('#stats').show();
+			$('#updatestatsbutton').removeClass('disabled');
+		}else{
+			$('#updatestatsbutton').addClass('disabled');
+		}
 	}
 	
 	var nbParticipants = localStorage[options.localStorage.incrits];
+	console.log("Found nbParticipants="+nbParticipants+" in localStorage");
+	var previousValue = $('#nbparticipants').text();
 	if(nbParticipants){
 		$('#nbparticipants').show();
-		$('#nbparticipants').text(nbParticipants);
+		if(parseInt(previousValue) != parseInt(nbParticipants) && !$('#nbparticipants').is(":focus")){
+			$('#nbparticipants').text(nbParticipants);
+			$('#nbParticipantsContainer').toggleClass("normal");
+			$('#nbParticipantsContainer').toggleClass("returned");
+		}
 	}else{
 		$('#nbparticipants').hide();
 	}
 	
 	var title = localStorage[options.localStorage.title];
+	console.log("Found title="+title+" in localStorage");
 	if(title){
 		$('#eventtitle').text(title);
-		$('#details').popover({placement:'bottom', title:title, content:localStorage[options.localStorage.desc]});
+		$('#detailsTitle').text(title);
+		$('#detailsDesc').popover({placement:'bottom', title:title, content:localStorage[options.localStorage.desc]});
 	}else{
 		$('#eventtitle').text("");
 	}
@@ -114,7 +135,7 @@ options.refreshEvents = function(){
 							
 							//Select different fonction for last element (need for asynchronous refresh)
 							if(i == events.length-1){
-								var addEvent = options.addEventAndRefresh;
+								var addEvent = options.addLastEvent;
 							}else{
 								var addEvent = options.addEvent;
 							}
@@ -138,6 +159,7 @@ options.refreshEvents = function(){
 								+ "</div>"
 					
 					options.showAndHide('#errorPanel', 0, alert);
+					$('#updatestatsbutton').button('reset');
 					console.error("No XML found for "+jugname);
 				}
 			  }
@@ -148,7 +170,7 @@ options.refreshEvents = function(){
 	},10);
 }
 
-options.addEventAndRefresh = function(date, title, nb){
+options.addLastEvent = function(date, title, nb){
 	jugevents.indexedDB.addEvent(date, title, nb, function(){
 		console.log("Refreshing chart");
 		$('#updatestatsbutton').button('reset');
@@ -161,12 +183,7 @@ options.addEvent = function(date, title, nb){
 }
 
 options.loadEvents = function(){
-	var data = new google.visualization.DataTable();
-	data.addColumn('date', 'Date');	
-	data.addColumn('number', 'Participants');
-	data.addColumn('string', 'title1');
-	data.addColumn('string', 'text1');
-	var nbParticipantsValues =[];
+	var events =[];
 	
 	jugevents.indexedDB.foreachEvents(
 		function (event){
@@ -177,37 +194,75 @@ options.loadEvents = function(){
 			var day 	= dateFields[0];
 			var date 	= new Date(year, month, day);
 			console.debug("Translated "+event.date+" to "+date+" with values relativeYear="+relativeYearText+" year="+year+" month="+month+" day="+day);
-			nbParticipantsValues.push(event.nbParticipants);
-			data.addRows([
-				[date, event.nbParticipants, event.title, event.title]
-			]);
+			events.push({date:date,audience:event.nbParticipants, title:event.title});
 		}, 
 		function(){
-			options.drawChart(data,nbParticipantsValues);
+			var comparator = function(eventA, eventB){
+				return eventA.date.getTime() - eventB.date.getTime()
+			};
+			events.sort(comparator);
+			options.drawChart(events);
 		}
 	);
 }
 
-options.drawChart = function(chartdata, values){
-	$('#medparticipants').text(options.Math.median(values));
-	$('#maxparticipants').text(Math.max.apply( Math, values));
-	$('#minparticipants').text(Math.min.apply( Math, values));
-	$('#avgparticipants').text(options.Math.avg(values));
-	//$('#chart').show();
-	if(!options.chart){
-		options.chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
+options.drawChart = function(events){
+	var graph = new Dygraph(document.getElementById("canvaschart"),
+						events.map(function (event){ return [event.date,event.audience] }),
+						{colors:["rgb(81,163,81)"], 
+						fillGraph:true,
+						fillAlpha:0.5, 
+						displayAnnotations:true,
+						labels:["date","Participants"],
+						labelsDiv: document.getElementById('chartLabels'),
+						highlightCircleSize: 5,
+						strokeWidth: 2});   
+						
+	var convert = function(date){
+		var d = date.getDate();
+		var m = date.getMonth()+1;
+		var y = date.getFullYear();
+		return '' + y +''+ (m<=9?'0'+m:m) +''+ (d<=9?'0'+d:d);
 	}
-	options.chart.draw(chartdata, {'colors': ['green'], fill:30, displayAnnotations: true, displayZoomButtons:false});
+						
+	var annotations = graph.annotations();
+	events.forEach(function (event){
+		var x = convert(event.date);
+		var annotation = {
+			series : "Participants",
+			x : event.date.getTime(),
+			shortText : "",
+			text : event.title,
+			cssClass: "icon-flag event-annotation",
+			tickHeight:0
+		};
+		
+		annotations.push(annotation);
+		console.log("Added "+annotation+" x="+x);
+	});
+	graph.setAnnotations(annotations);
+	
+	//Display tooltip of chart with Bootstrap Tooltips
+	$('#canvaschart *[title]').tooltip();
+	
+	var audiences = events.map(function (event){ return event.audience });
+	$('#medparticipants').text(options.Math.median(audiences));
+	$('#maxparticipants').text(Math.max.apply( Math, audiences));
+	$('#minparticipants').text(Math.min.apply( Math, audiences));
+	$('#avgparticipants').text(options.Math.avg(audiences));
 }
-
-options.show = function(pane){
-	$('#menu a[href="#'+pane+'"]').tab('show');
+options.onRequestReceived = function(request, sender, sendResponse){
+	if (request.action == "eventUpdated"){
+		console.log("Received an update on event values");
+		setTimeout(options.restore,10);
+	}
+	sendResponse();
 }
 
 options.onLoad = function(){
+	chrome.extension.onRequest.addListener(options.onRequestReceived);
 	jugevents.indexedDB.onOpen = options.loadEvents;
 	jugevents.indexedDB.open();
-	options.show('optionspane');
 	$('*[rel="tooltip"]').tooltip();
-	options.restore();
+	options.restore(true);
 }

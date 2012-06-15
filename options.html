@@ -1,19 +1,17 @@
 <!DOCTYPE HTML>
 <html lang="en">
 	<link rel="stylesheet" href="bootstrap/css/bootstrap.css">
-	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
-	<script type='text/javascript' src="jugevents.js"></script>
-	<script type='text/javascript' src="options.js"></script>
-
-	<script type='text/javascript' src="bootstrap/js/jquery.js"></script>
-	<script type='text/javascript' src="bootstrap/js/bootstrap.js"></script>
-	<script type='text/javascript' src="bootstrap/js/bootstrap-tooltip.js"></script>
-	<script type='text/javascript' src="bootstrap/js/bootstrap-popover.js"></script>
-	<script type='text/javascript' src="bootstrap/js/bootstrap-button.js"></script>
+	<link rel="stylesheet" href="jugevents.css">
 	
-	<script type='text/javascript'>
-		google.load('visualization', '1', {'packages':['annotatedtimeline']});
-	</script>
+	<script src="bootstrap/js/jquery.js"></script>
+	<script src="bootstrap/js/bootstrap.js"></script>
+	<script src="bootstrap/js/bootstrap-tooltip.js"></script>
+	<script src="bootstrap/js/bootstrap-popover.js"></script>
+	<script src="bootstrap/js/bootstrap-button.js"></script>
+	
+	<script src="dygraph-combined.js"></script>
+	<script src="jugevents.db.js"></script>
+	<script src="options.js"></script>
 
 	<body onload="options.onLoad();">
 		<div class="tab-content well">
@@ -30,27 +28,14 @@
 						</div>
 					</div>
 					<div class="control-group">
-						<label for="id" class="control-label">Evènement Suivi</label>
+						<label for="id" class="control-label">Suivre un évènement</label>
 						<div class="controls">
 							<input id="id" type="text" class="input-small" placeholder="46430"></input>
-							<span>
-									<span><a id="details" href="http://www.jugevents.org/" target="_blank">Details</a></span>
-									- <a id="participants" href="http://www.jugevents.org/" target="_blank">Participants</a></span> <span id="nbparticipants" class="label label-success">
-							</span> 
 							<p class="help-block">
 								<span id="identifianttooltip" class="badge" rel="tooltip" title="Pour retourver cet identifiant, allez sur la page de l'évènement dans jugevents.org et récupérez le numéro en fin d'URL">Identifiant <i class="icon-question-sign  icon-white"></i></span> 
 							de l'évènement sur jugevents. Renseigner ce champ permet de voir en temps réel le nombre d'inscrits à cet évènement
 							</p>
-							<!--
-							<blockquote class="well" id="event">
-								<p id="eventtitle"></p>
-								<small id="eventspeakers">Someone famous speaker</small>
-								
-								</span>
-							</blockquote>
-							-->
 						</div>
-						
 					</div>
 					<div class="control-group">
 						<div class="controls">
@@ -60,13 +45,20 @@
 							</div>
 						</div>
 					</div>
+					<div id="detailsEvent" class="container">
+						<div class="row">
+							<div id="detailsDesc" class="span6 well"><blockquote><p id="detailsTitle"></p><small id="detailsAuthor">Inconnu</small></blockquote></div>
+							<div class="span1"><a id="details" href="http://www.jugevents.org/" target="_blank">Details</a></div>
+							<div class="span1"><a id="participants" href="http://www.jugevents.org/" target="_blank">Participants</a></div>
+							<div id="nbParticipantsContainer" class="span1 normal"><span id="nbparticipants" class="label label-important"></div>
+						</div> 
+					</div>
 				</div>
 			</div>
 			<div class="tab-pane active" id="statspane">
 				<div id="stats">
 					<div class="page-header">
 					  <h1>Statistiques du JUG <button id="updatestatsbutton" onclick="options.refreshEvents();" class='btn btn-primary' rel="tooltip" title="Mettre à jour avec les dernières données disponibles sur jugevents.org" data-loading-text="Chargement..." ><i class="icon-refresh icon-white"></i> Mettre à jour</button></h1>
-					  
 					</div>
 					<div class="container-fluid">
 						<div class="row">
@@ -75,28 +67,37 @@
 						</div>
 					</div>
 					
-					<div id="chart">
-						<span id="statistics">
-							<span>
-								<span>Moyenne</span>
-								<span><span id="avgparticipants" class="badge badge-info"></span></span>
-							</span>
-							<span>
-								<span>Médiane</span>
-								<span><span id="medparticipants" class="badge badge-info"></span></span>
-							</span>
-							<span>
-								<span>Max</span>
-								<span><span id="maxparticipants" class="badge badge-success"></span></span>
-							</span>
-							<span>
-								<span>Min</span>
-								<span><span id="minparticipants" class="badge badge-important"></span></span>
-							</span>
-						</span>
+					<div id="chart" class="container">
+						<div class="row">
+							
+							<div id="canvaschart" class="span8 well" style="width:800px;height:200px;"></div>
+						</div>
+						<div class="row">
+							<div id="statistics"  class="span4 well">
+								<span>
+									<span>Moyenne</span>
+									<span><span id="avgparticipants" class="badge badge-info"></span></span>
+								</span>
+								<span>
+									<span>Médiane</span>
+									<span><span id="medparticipants" class="badge badge-info"></span></span>
+								</span>
+								<span>
+									<span>Max</span>
+									<span><span id="maxparticipants" class="badge badge-success"></span></span>
+								</span>
+								<span>
+									<span>Min</span>
+									<span><span id="minparticipants" class="badge badge-important"></span></span>
+								</span>
+							</div>
+							<div id="chartLabels" class="span4 well"></div>
+						</div>
+						<!--
 						<div>
 							<div id='chart_div' style='width: 1200px; height: 400px;'></div>
 						</div>
+						-->
 					</div>
 				</div>
 			</div>
