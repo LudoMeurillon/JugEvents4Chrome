@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+	<link rel="stylesheet" href="jugevents.css">
+	
+	<script src="bootstrap/js/jquery.js"></script>
+	<script src="bootstrap/js/bootstrap.js"></script>
+	<script src="bootstrap/js/bootstrap-tooltip.js"></script>
+	<script src="bootstrap/js/bootstrap-popover.js"></script>
+	<script src="bootstrap/js/bootstrap-button.js"></script>
+	
+	<script src="dygraph-combined.js"></script>
+	<script src="jugevents.db.js"></script>
+	<script src="options.js"></script>
+
+	<body onload="options.onLoad();">
+		<div class="well">
+			<div id="detailsEvent" class="well span6">
+				<div class="row">
+					<div id="detailsDesc" class="span4"><blockquote><p id="detailsTitle"></p><small id="detailsAuthor">Inconnu</small></blockquote></div>
+				</div> 
+				<div class="row">
+					<div class="span1"><a id="details" href="http://www.jugevents.org/" target="_blank">Details</a></div>
+					<div class="span1"><a id="participants" href="http://www.jugevents.org/" target="_blank">Participants</a></div>
+					<div id="nbParticipantsContainer" class="span1 normal"><span id="nbparticipants" class="label label-important"></div>
+				</div>
+			</div>
+
+			<div class="page-header">
+			  <h1>Statistiques du JUG <span id="jugName"></span></h1>
+			</div>
+			<div id="chart">
+				<div class="row">
+					<div id="canvaschart" class="span8" style="width:500px;height:200px;"></div>
+				</div>
+				<div class="row">
+					<div id="statistics"  class="span4 well">
+						<span>
+							<span>Moyenne</span>
+							<span><span id="avgparticipants" class="badge badge-info"></span></span>
+						</span>
+						<span>
+							<span>Médiane</span>
+							<span><span id="medparticipants" class="badge badge-info"></span></span>
+						</span>
+						<span>
+							<span>Max</span>
+							<span><span id="maxparticipants" class="badge badge-success"></span></span>
+						</span>
+						<span>
+							<span>Min</span>
+							<span><span id="minparticipants" class="badge badge-important"></span></span>
+						</span>
+					</div>
+					<div id="chartLabels" class="span4 well"></div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
