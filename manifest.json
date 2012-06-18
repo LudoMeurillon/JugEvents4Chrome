@@ -4,7 +4,8 @@
   "description": "Gestion des inscrits dans un evenement de JUG",
   "browser_action": {
     "name": "JugEvents",
-	"default_icon": "logo.jpeg"
+	"default_icon": "logo.jpeg",
+	"default_popup": "popup.html"
   },
   "icons": {
 	"128" : "logo.jpeg"
