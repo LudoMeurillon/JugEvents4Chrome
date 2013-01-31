@@ -91,7 +91,7 @@ background.onRequestReceived = function(request, sender, sendResponse){
 
 
 background.init = function() {
-	chrome.extension.onRequest.addListener(background.onRequestReceived);
+	chrome.extension.onMessage.addListener(background.onRequestReceived);
 }
 
 background.updateBadge();

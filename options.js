@@ -54,7 +54,7 @@ options.save = function(){
 	}
 	
 	options.store(options.localStorage.jugnameid,'jugName');
-	chrome.extension.sendRequest({action: "optionsSaved"}, function(response) {
+	chrome.extension.sendMessage({action: "optionsSaved"}, function(response) {
 	  console.log("call to background.js done");
 	});
 	options.restore();
@@ -259,10 +259,16 @@ options.onRequestReceived = function(request, sender, sendResponse){
 	sendResponse();
 }
 
-options.onLoad = function(){
-	chrome.extension.onRequest.addListener(options.onRequestReceived);
+options.init = function(){
 	jugevents.indexedDB.onOpen = options.loadEvents;
 	jugevents.indexedDB.open();
 	$('*[rel="tooltip"]').tooltip();
 	options.restore(true);
+	
+	document.querySelector('#saveButton').addEventListener('click', options.save);
+	document.querySelector('#updatestatsbutton').addEventListener('click', options.refreshEvents);
+	chrome.extension.onRequest.addListener(options.onRequestReceived);
 }
+
+document.addEventListener('DOMContentLoaded', options.init);
+ 

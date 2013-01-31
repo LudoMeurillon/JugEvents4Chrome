@@ -1,16 +1,18 @@
 ﻿{
+  "manifest_version" : 2, 
   "name": "Jugevents",
   "version": "1.0",
   "description": "Gestion des inscrits dans un evenement de JUG",
   "browser_action": {
-    "name": "JugEvents",
 	"default_icon": "logo.jpeg",
+    "default_title": "JugEvents",
 	"default_popup": "popup.html"
   },
   "icons": {
 	"128" : "logo.jpeg"
   },
   "background": {
+	"persistent": false,
 	"scripts":["background.js"]
   },
   "options_page": "options.html",

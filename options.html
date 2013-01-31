@@ -3,17 +3,8 @@
 	<link rel="stylesheet" href="bootstrap/css/bootstrap.css">
 	<link rel="stylesheet" href="jugevents.css">
 	
-	<script src="bootstrap/js/jquery.js"></script>
-	<script src="bootstrap/js/bootstrap.js"></script>
-	<script src="bootstrap/js/bootstrap-tooltip.js"></script>
-	<script src="bootstrap/js/bootstrap-popover.js"></script>
-	<script src="bootstrap/js/bootstrap-button.js"></script>
-	
-	<script src="dygraph-combined.js"></script>
-	<script src="jugevents.db.js"></script>
-	<script src="options.js"></script>
 
-	<body onload="options.onLoad();">
+	<body>
 		<div class="tab-content well">
 	  		<div class="tab-pane active" id="optionspane">
 				<div id="options" class="form-horizontal">
@@ -40,7 +31,7 @@
 					<div class="control-group">
 						<div class="controls">
 							<div>
-								<button onclick="options.save();" class='btn btn-success'>Save Options </button>
+								<button id="saveButton" class='btn btn-success'>Save Options </button>
 								<span id="saved" style="display:none;" class="label label-success"/>
 							</div>
 						</div>
@@ -58,7 +49,7 @@
 			<div class="tab-pane active" id="statspane">
 				<div id="stats">
 					<div class="page-header">
-					  <h1>Statistiques du JUG <button id="updatestatsbutton" onclick="options.refreshEvents();" class='btn btn-primary' rel="tooltip" title="Mettre à jour avec les dernières données disponibles sur jugevents.org" data-loading-text="Chargement..." ><i class="icon-refresh icon-white"></i> Mettre à jour</button></h1>
+					  <h1>Statistiques du JUG <button id="updatestatsbutton" class='btn btn-primary' rel="tooltip" title="Mettre à jour avec les dernières données disponibles sur jugevents.org" data-loading-text="Chargement..." ><i class="icon-refresh icon-white"></i> Mettre à jour</button></h1>
 					</div>
 					<div class="container-fluid">
 						<div class="row">
@@ -103,4 +94,15 @@
 			</div>
 		</div>
 	</body>
+	
+	
+	<script type="text/javascript" src="bootstrap/js/jquery.js"></script>
+	<script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>
+	<script type="text/javascript" src="bootstrap/js/bootstrap-tooltip.js"></script>
+	<script type="text/javascript" src="bootstrap/js/bootstrap-popover.js"></script>
+	<script type="text/javascript" src="bootstrap/js/bootstrap-button.js"></script>
+	
+	<script type="text/javascript" src="dygraph-combined.js"></script>
+	<script type="text/javascript" src="jugevents.db.js"></script>
+	<script type="text/javascript" src="options.js"></script>
 </html>
