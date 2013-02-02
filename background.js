@@ -44,7 +44,7 @@ background.check = function(){
 			}
 			localStorage[background.inscritsId]=inscrits;
 			background.updateBadge();
-			chrome.extension.sendRequest({action: "eventUpdated"}, function(response) {
+			chrome.extension.sendMessage({action: "eventUpdated"}, function(response) {
 			  console.log("Event updated for all extension");
 			});
 		  }
