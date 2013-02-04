@@ -16,5 +16,8 @@
 	"scripts":["background.js"]
   },
   "options_page": "options.html",
-  "permissions": ["tabs", "http://*.jugevents.org/*"]
+  "permissions": ["tabs", "http://*.jugevents.org/*", "notifications"],
+  "web_accessible_resources": [
+    "logo.jpeg"
+  ]
 }

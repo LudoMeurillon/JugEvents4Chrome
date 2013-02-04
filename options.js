@@ -41,24 +41,53 @@ options.showAndHide = function(selector, timeout, message){
 
 options.store = function (storageid, input){
 	var value = $("#"+input).val();
-	localStorage[storageid]=value;
-	console.log("stored "+value+" into localStorage['"+storageid+"']");
+	options.storeValue(storageid, value);
 }
 
-options.save = function(){
-	if(localStorage[options.localStorage.eventid] != $("#id").val()){
-		options.store(options.localStorage.eventid,'id');
-		localStorage.removeItem(options.localStorage.title);
-		localStorage.removeItem(options.localStorage.desc);
-		localStorage.removeItem(options.localStorage.incrits);
+options.storeValue = function(storageid, value){
+	localStorage[storageid]=value;
+	console.log("stored "+value+" into localStorage['"+storageid+"']");
+} 
+
+options.autoFollow = function(jugName){
+    var url = options.http.JUGEVENTS_ROOT_URL+"search.form?continent=&country=&jugName="+jugName+"&pastEvents=true&_pastEvents=on&orderByDate=desc"
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4) { 
+			var regex = new RegExp("<a.href=\".jugevents.event.([0-9]+)\".*>","mgi");
+			var matches = xhr.responseText.match(regex);
+			if(matches.length > 0){
+				var lastEvent = matches[0];
+				var eventID = regex.exec(lastEvent)[1];
+				chrome.extension.sendMessage({action: "eventFollow", event: eventID}, function(response) {
+					console.log("call to background.js done");
+				});
+			}
+		}
 	}
-	
+	xhr.open("GET", url, false);
+	xhr.send();
+}
+
+
+options.save = function(){
 	options.store(options.localStorage.jugnameid,'jugName');
-	chrome.extension.sendMessage({action: "optionsSaved"}, function(response) {
-	  console.log("call to background.js done");
-	});
-	options.restore();
 	options.showAndHide('#saved', 2000, "Options saved !");
+
+	setTimeout(function (){
+		chrome.extension.sendMessage(
+			{action: "optionsSaved"}, 
+			function(response) {
+				console.log("call to background.js done");
+			}
+		);
+	},10);
+	if($("#jugName").val()){
+		options.refreshEvents();
+	}
+	setTimeout(function(){
+		options.autoFollow(localStorage[options.localStorage.jugnameid]);
+	}, 10);
 }
 
 options.restore = function(initFields){
@@ -104,6 +133,7 @@ options.restore = function(initFields){
 	console.log("Found title="+title+" in localStorage");
 	if(title){
 		$('#eventtitle').text(title);
+		$('#detailsAuthor').text(jugName);
 		$('#detailsTitle').text(title);
 		$('#detailsDesc').popover({placement:'bottom', title:title, content:localStorage[options.localStorage.desc]});
 	}else{
@@ -264,10 +294,18 @@ options.init = function(){
 	jugevents.indexedDB.open();
 	$('*[rel="tooltip"]').tooltip();
 	options.restore(true);
+
+	options.addClickListener('#saveButton', options.save);
+	options.addClickListener('#updatestatsbutton', options.refreshEvents);
 	
-	document.querySelector('#saveButton').addEventListener('click', options.save);
-	document.querySelector('#updatestatsbutton').addEventListener('click', options.refreshEvents);
-	chrome.extension.onRequest.addListener(options.onRequestReceived);
+	chrome.extension.onMessage.addListener(options.onRequestReceived);
+}
+
+options.addClickListener = function(selector, listener){
+	var component = document.querySelector(selector);
+	if(component){
+		component.addEventListener('click',listener);
+	}
 }
 
 document.addEventListener('DOMContentLoaded', options.init);

@@ -21,7 +21,12 @@ background.stop = function(){
 
 background.updateBadge = function(){
 	if(chrome.browserAction){
-		chrome.browserAction.setBadgeText({text:localStorage[background.inscritsId]+""});
+		var inscrits = localStorage[background.inscritsId];
+		var label = "";
+		if(inscrits){
+			label = inscrits+"";
+		}
+		chrome.browserAction.setBadgeText({text:label});
 	}
 }
 
@@ -42,11 +47,13 @@ background.check = function(){
 			if(matches){
 				inscrits = matches.length;
 			}
-			localStorage[background.inscritsId]=inscrits;
-			background.updateBadge();
-			chrome.extension.sendMessage({action: "eventUpdated"}, function(response) {
-			  console.log("Event updated for all extension");
-			});
+			if(localStorage[background.inscritsId] != inscrits){
+				localStorage[background.inscritsId]=inscrits;
+				background.updateBadge();
+				chrome.extension.sendMessage({action: "eventUpdated"}, function(response) {
+				  console.log("Updated participants number");
+				});
+			}
 		  }
 		}
 		xhr.open("GET", background.url+id, false);
@@ -60,14 +67,26 @@ background.check = function(){
 			if(matches){
 				title = matches[0].replace('<div class="eventTitle">','').replace('</div>','');
 			}
-			localStorage[background.titleId]=title;
+			if(localStorage[background.titleId]!=title){
+				localStorage[background.titleId]=title;
+				chrome.extension.sendMessage({action: "eventUpdated"}, function(response) {
+					console.log("Updated next event title");
+				});
+			}
+			
 			
 			var matches = xhr2.responseText.match(/<div.class=.preview.>.*<.div>/mgi);
 			var desc;
 			if(matches){
 				desc = matches[0].replace('<div class="preview">','').replace('</div>','');
 			}
-			localStorage[background.descId]=desc;
+			
+			if(localStorage[background.descId]!=desc){
+				localStorage[background.descId]=desc;
+				chrome.extension.sendMessage({action: "eventUpdated"}, function(response) {
+					console.log("Updated next event description");
+				});
+			}
 		  }
 		}
 		xhr2.open("GET", background.eventurl+id, false);
@@ -77,11 +96,31 @@ background.check = function(){
 	}
 }
 
+background.follow = function(eventId){
+	if(localStorage[background.eventId] != eventId){
+		localStorage[background.eventId] = eventId;
+		localStorage.removeItem(background.titleId);
+		localStorage.removeItem(background.descId);
+		localStorage.removeItem(background.inscritsId);
+		if(eventId){
+			var notification = webkitNotifications.createNotification(
+			  'logo.jpeg',  // icon url - can be relative
+			  'Following '+eventId,  // notification title
+			  'You are now following event '+eventId  // notification body text
+			);
+			notification.show();
+		}
+	}
+}
+
+
 background.onRequestReceived = function(request, sender, sendResponse){
-	if (request.action == "optionsSaved"){
-		console.log("Received an update on options");
+	if(request.action == "eventFollow"){
+	    console.log("Received an update on options");
 		setTimeout(function(){
 			background.stop();
+			background.follow(request.event);
+			background.updateBadge();
 			background.check();
 			background.start();
 		},10);
