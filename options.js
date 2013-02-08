@@ -135,7 +135,8 @@ options.restore = function(initFields){
 		$('#eventtitle').text(title);
 		$('#detailsAuthor').text(jugName);
 		$('#detailsTitle').text(title);
-		$('#detailsDesc').popover({placement:'bottom', title:title, content:localStorage[options.localStorage.desc]});
+		$('#detailsDesc').popover('destroy');
+		$('#detailsDesc').popover({placement:'bottom', html:true, trigger:'hover', title:title, content:localStorage[options.localStorage.desc]});
 	}else{
 		$('#eventtitle').text("");
 	}
@@ -262,7 +263,7 @@ options.drawChart = function(events){
 			series : "Participants",
 			x : event.date.getTime(),
 			shortText : "",
-			text : event.title,
+			text : event.title + " ("+event.audience+" registered)",
 			cssClass: "icon-flag event-annotation",
 			tickHeight:0
 		};
@@ -293,6 +294,19 @@ options.init = function(){
 	jugevents.indexedDB.onOpen = options.loadEvents;
 	jugevents.indexedDB.open();
 	$('*[rel="tooltip"]').tooltip();
+	
+	jugevents.indexedDB.onOpenJUGs = function(){
+		var jugsNames = [];
+		jugevents.indexedDB.foreachJUGs(function(jug){
+			jugsNames.push(jug.name);
+		},
+		function(){
+			$('#jugName').typeahead({source:jugsNames});	
+		});
+	};
+	jugevents.indexedDB.openJUGs();
+	
+	
 	options.restore(true);
 
 	options.addClickListener('#saveButton', options.save);

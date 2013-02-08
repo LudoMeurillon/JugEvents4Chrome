@@ -13,7 +13,7 @@
   },
   "background": {
 	"persistent": false,
-	"scripts":["background.js"]
+	"scripts":["jugevents.db.js", "background.js"]
   },
   "options_page": "options.html",
   "permissions": ["tabs", "http://*.jugevents.org/*", "notifications"],

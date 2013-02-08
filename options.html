@@ -3,6 +3,7 @@
 	<link rel="stylesheet" href="bootstrap/css/bootstrap.css">
 	<link rel="stylesheet" href="jugevents.css">
 	
+	
 
 	<body>
 		<div class="tab-content well">
@@ -14,7 +15,7 @@
 					<div class="control-group">
 						<label for="jugName" class="control-label">JUG</label>
 						<div class="controls">
-							<input class="input-small" id="jugName" type="text" placeholder="Alpes JUG"></input>
+							<input class="input-small" id="jugName" type="text" data-provide="typeahead" placeholder="Alpes JUG"></input>
 							<p class="help-block"><span id="nomtooltip" class="badge" rel="tooltip" title="La casse n'est pas importante mais les espaces le sont">Nom <i class="icon-question-sign icon-white"></i></span> du JUG sur jugevents</p>
 						</div>
 					</div>
@@ -38,10 +39,10 @@
 					</div>
 					<div id="detailsEvent" class="container">
 						<div class="row">
-							<div id="detailsDesc" class="span6 well"><blockquote><p id="detailsTitle"></p><small id="detailsAuthor">Inconnu</small></blockquote></div>
+							<div id="detailsDesc" class="span6 well"><blockquote><p id="detailsTitle"></p><small id="detailsAuthor">Unknown</small></blockquote></div>
 							<div class="span1"><a id="details" href="http://www.jugevents.org/" target="_blank">Details</a></div>
+							<div id="nbParticipantsContainer" class="span normal"><span id="nbparticipants" class="label label-important"></div>
 							<div class="span1"><a id="participants" href="http://www.jugevents.org/" target="_blank">Participants</a></div>
-							<div id="nbParticipantsContainer" class="span1 normal"><span id="nbparticipants" class="label label-important"></div>
 						</div> 
 					</div>
 				</div>
@@ -49,7 +50,7 @@
 			<div class="tab-pane active" id="statspane">
 				<div id="stats">
 					<div class="page-header">
-					  <h1>Statistiques du JUG <button id="updatestatsbutton" class='btn btn-primary' rel="tooltip" title="Mettre à jour avec les dernières données disponibles sur jugevents.org" data-loading-text="Chargement..." ><i class="icon-refresh icon-white"></i> Mettre à jour</button></h1>
+					  <h1>JUG stats <button id="updatestatsbutton" class='btn btn-primary' rel="tooltip" title="Update stats with data available on jugevents.org" data-loading-text="Loading..." ><i class="icon-refresh icon-white"></i> Update</button></h1>
 					</div>
 					<div class="container-fluid">
 						<div class="row">
@@ -64,7 +65,7 @@
 							<div id="canvaschart" class="span8 well" style="width:800px;height:200px;"></div>
 						</div>
 						<div class="row">
-							<div id="statistics"  class="span4 well">
+							<div id="statistics"  class="span6 well">
 								<span>
 									<span>Moyenne</span>
 									<span><span id="avgparticipants" class="badge badge-info"></span></span>
@@ -82,7 +83,7 @@
 									<span><span id="minparticipants" class="badge badge-important"></span></span>
 								</span>
 							</div>
-							<div id="chartLabels" class="span4 well"></div>
+							<div id="chartLabels" style="display:none;" class="span4 well"></div>
 						</div>
 						<!--
 						<div>
@@ -95,12 +96,9 @@
 		</div>
 	</body>
 	
-	
-	<script type="text/javascript" src="bootstrap/js/jquery.js"></script>
-	<script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>
-	<script type="text/javascript" src="bootstrap/js/bootstrap-tooltip.js"></script>
-	<script type="text/javascript" src="bootstrap/js/bootstrap-popover.js"></script>
-	<script type="text/javascript" src="bootstrap/js/bootstrap-button.js"></script>
+
+	<script src="bootstrap/js/jquery-latest.js"></script>
+	<script src="bootstrap/js/bootstrap.js"></script>
 	
 	<script type="text/javascript" src="dygraph-combined.js"></script>
 	<script type="text/javascript" src="jugevents.db.js"></script>

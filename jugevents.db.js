@@ -6,12 +6,35 @@ window.IDBKeyRange = window.webkitIDBKeyRange;
 jugevents.version = "2.0";
 jugevents.dbname = "events";
 jugevents.storename = "event";
+jugevents.store = {};
+jugevents.store.jug = "jug";
 jugevents.indexedDB = {};
 jugevents.indexedDB.db = null;
+jugevents.indexedDB.jugdb = null;
 
 jugevents.indexedDB.onerror = function(e) {
   console.log(e);
 };
+
+jugevents.indexedDB.openJUGs = function() {
+  var request = indexedDB.open("jugs", jugevents.version);
+  request.onupgradeneeded = function (e) {
+		db = e.target.result;
+		if (!db.objectStoreNames.contains(jugevents.store.jug)) {
+			console.log('Create objectstore');
+			db.createObjectStore(jugevents.store.jug, {keyPath: "name"});
+		}
+   };
+
+  request.onsuccess = function(e) {
+    jugevents.indexedDB.jugdb = e.target.result;
+	if(jugevents.indexedDB.onOpenJUGs){
+		jugevents.indexedDB.onOpenJUGs();
+	}
+  };
+
+  request.onerror = jugevents.indexedDB.onerror;
+}
 
 jugevents.indexedDB.open = function() {
   var request = indexedDB.open(jugevents.dbname, jugevents.version);
@@ -47,6 +70,21 @@ jugevents.indexedDB.deleteEventsAndThen = function(then) {
 	};
 }
 
+jugevents.indexedDB.addJug = function(name, desc, coordinates, onsuccess) {
+  var db = jugevents.indexedDB.jugdb;
+  var trans = db.transaction([jugevents.store.jug], "readwrite");
+  var store = trans.objectStore(jugevents.store.jug);
+
+  var data = {"name": name, "desc": desc, "coordinates": coordinates};
+
+  var request = store.put(data);
+  request.onsuccess = onsuccess;
+
+  request.onerror = function(e) {
+    console.log("Error Adding: ", e);
+  };
+};
+
 jugevents.indexedDB.addEvent = function(date, title, audience, onsuccess) {
   var db = jugevents.indexedDB.db;
   var trans = db.transaction([jugevents.storename], "readwrite");
@@ -62,6 +100,31 @@ jugevents.indexedDB.addEvent = function(date, title, audience, onsuccess) {
     console.log("Error Adding: ", e);
   };
 };
+
+jugevents.indexedDB.foreachJUGs = function(doSomething, after) {
+  var db = jugevents.indexedDB.jugdb;
+  var trans = db.transaction([jugevents.store.jug], "readwrite");
+  var store = trans.objectStore(jugevents.store.jug);
+
+  // Get everything in the store;
+  var keyRange = IDBKeyRange.lowerBound(0);
+  var cursorRequest = store.openCursor(keyRange);
+
+  cursorRequest.onsuccess = function(e) {
+    var result = e.target.result;
+    if(!!result == false){
+		console.log("result == false");
+		after();
+        return;
+	}
+
+    doSomething(result.value);
+    result.continue();
+  };
+
+  cursorRequest.onerror = jugevents.indexedDB.onerror;
+};
+
 
 jugevents.indexedDB.foreachEvents = function(doSomething, after) {
   var db = jugevents.indexedDB.db;

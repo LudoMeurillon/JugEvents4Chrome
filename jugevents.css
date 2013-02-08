@@ -7,15 +7,19 @@
 	margin-left:-10px;
 }
 
+#detailsEvent .popover{
+	width:400px;
+}
+
 .normal{
-	margin-left:-8px;
+	margin-right:-16px;
 	text-align:center;
 	-webkit-transform: rotateZ(0deg);
 	-webkit-transition: -webkit-transform 0.5s ease-in-out;
 }
 
 .returned{
-	margin-left:-8px;
+	margin-right:-16px;
 	text-align:center;
 	-webkit-transform: rotateZ(360deg);
 	-webkit-transition: -webkit-transform 0.5s ease-in-out;

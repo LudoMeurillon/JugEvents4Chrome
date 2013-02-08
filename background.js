@@ -69,6 +69,16 @@ background.check = function(){
 			}
 			if(localStorage[background.titleId]!=title){
 				localStorage[background.titleId]=title;
+				
+				if(title){
+					var notification = webkitNotifications.createNotification(
+					  'logo.jpeg',  // icon url - can be relative
+					  'Following a new event',  // notification title
+					  'You are now following "'+title+'"' // notification body text
+					);
+					notification.show();
+				}
+				
 				chrome.extension.sendMessage({action: "eventUpdated"}, function(response) {
 					console.log("Updated next event title");
 				});
@@ -102,14 +112,9 @@ background.follow = function(eventId){
 		localStorage.removeItem(background.titleId);
 		localStorage.removeItem(background.descId);
 		localStorage.removeItem(background.inscritsId);
-		if(eventId){
-			var notification = webkitNotifications.createNotification(
-			  'logo.jpeg',  // icon url - can be relative
-			  'Following '+eventId,  // notification title
-			  'You are now following event '+eventId  // notification body text
-			);
-			notification.show();
-		}
+		chrome.extension.sendMessage({action: "eventUpdated"}, function(response) {
+			console.log("Updated next event description");
+		});
 	}
 }
 
@@ -128,12 +133,35 @@ background.onRequestReceived = function(request, sender, sendResponse){
 	sendResponse();
 }
 
+background.fetchKML = function(){
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+	  if (xhr.readyState == 4) { 
+		var doc = new DOMParser().parseFromString(xhr.responseText, "text/xml");
+		var jugs = doc.querySelectorAll("Placemark");
+		for(var i =0; i<jugs.length; i++){
+			var jug = jugs.item(i);
+			var name = jug.querySelector("name").textContent;
+			var desc = jug.querySelector("description").textContent;
+			var coord = jug.querySelector("Point>coordinates").textContent;
+			console.log("adding", name);
+			jugevents.indexedDB.addJug(name, desc, coord);
+			
+		}
+	  }
+	}
+	xhr.open("GET","http://www.jugevents.org/jugevents/service/kml.html",false);
+	xhr.send();
+}
+
 
 background.init = function() {
+	jugevents.indexedDB.onOpenJUGs = background.fetchKML;
+	jugevents.indexedDB.openJUGs();
+	background.updateBadge();
+	background.start();
 	chrome.extension.onMessage.addListener(background.onRequestReceived);
 }
 
-background.updateBadge();
-background.start();
 
 window.addEventListener("DOMContentLoaded", background.init, false);
