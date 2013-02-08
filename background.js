@@ -145,7 +145,7 @@ background.fetchKML = function(){
 			var desc = jug.querySelector("description").textContent;
 			var coord = jug.querySelector("Point>coordinates").textContent;
 			console.log("adding", name);
-			jugevents.indexedDB.addJug(name, desc, coord);
+			jugeventsdb.indexedDB.addJug(name, desc, coord);
 			
 		}
 	  }
@@ -156,8 +156,8 @@ background.fetchKML = function(){
 
 
 background.init = function() {
-	jugevents.indexedDB.onOpenJUGs = background.fetchKML;
-	jugevents.indexedDB.openJUGs();
+	jugeventsdb.indexedDB.onOpenJUGs = background.fetchKML;
+	jugeventsdb.indexedDB.openJUGs();
 	background.updateBadge();
 	background.start();
 	chrome.extension.onMessage.addListener(background.onRequestReceived);
