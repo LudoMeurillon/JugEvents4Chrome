@@ -1,7 +1,7 @@
 ﻿{
   "manifest_version" : 2, 
   "name": "Jugevents",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Follow your favorite JUG from jugevents.org and coming events",
   "browser_action": {
 	"default_icon": "logo.jpeg",
@@ -16,7 +16,7 @@
 	"scripts":["jugevents.db.js", "background.js"]
   },
   "options_page": "options.html",
-  "permissions": ["tabs", "http://*.jugevents.org/*", "notifications"],
+  "permissions": ["http://*.jugevents.org/*", "notifications"],
   "web_accessible_resources": [
     "logo.jpeg"
   ]
