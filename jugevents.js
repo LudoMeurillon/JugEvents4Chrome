@@ -1,32 +1,53 @@
-jugevents = {};
+jugevents = {
+	eventsLoaded : 		"eventLoading",
+	eventsLoaded : 		"eventLoaded",
+	eventsLoadFailed : 	"eventsLoadFailed",
+	eventsStored : 		"eventsStored",
 
-jugevents.Math = {};	
+	subscribe : function(event, listener){
+		$(this).bind(event, listener);
+	},
+	
+	notify : function(event, params){
+		$(this).trigger(event, [params]);
+	},
+	
+	http : {
+		jugevents_ROOT_URL : "http://www.jugevents.org/jugevents/event/",
+		SHOW_PARTICIPANTS_URL : "http://www.jugevents.org/jugevents/event/showParticipants.html?id=",
+		EDIT_EVENT_URL : "http://www.jugevents.org/jugevents/event/edit.form?id="
+	},
+	
+	localStorage : {
+		jugnameid : "event.jugname",
+		eventid : "event.id",
+		incrits : "event.inscrits",
+		title : "event.title",
+		desc : "event.desc"
+	},
+	
 
-jugevents.Math.median = function (values) {
-	values.sort( function(a,b) {return a - b;} );
-	var half = Math.floor(values.length/2);
-	if(values.length % 2)
-		return values[half];
-	else
-		return (values[half-1] + values[half]) / 2.0;
-}
-
-jugevents.Math.avg = function (values) {
-	var sum = 0;
-	values.forEach(function(v){sum=sum+v});
-	return Math.round(sum/values.length);
-}
-
-jugevents.http = {};
-jugevents.http.jugevents_ROOT_URL = "http://www.jugevents.org/jugevents/event/";
-jugevents.http.SHOW_PARTICIPANTS_URL = jugevents.http.jugevents_ROOT_URL+"showParticipants.html?id=";
-
-jugevents.localStorage={};
-jugevents.localStorage.jugnameid 	= "event.jugname";
-jugevents.localStorage.eventid 	= "event.id";
-jugevents.localStorage.incrits 	= "event.inscrits";
-jugevents.localStorage.title 		= "event.title";
-jugevents.localStorage.desc 		= "event.desc";
+	storeValue : function(storageid, value){
+		localStorage[storageid]=value;
+		console.log("stored "+value+" into localStorage['"+storageid+"']");
+	},
+	
+	Math : {
+		median : function (values) {
+			values.sort( function(a,b) {return a - b;} );
+			var half = Math.floor(values.length/2);
+			if(values.length % 2)
+				return values[half];
+			else
+				return (values[half-1] + values[half]) / 2.0;
+		},
+		avg : function (values) {
+			var sum = 0;
+			values.forEach(function(v){sum=sum+v});
+			return Math.round(sum/values.length);
+		}
+	}
+};
 
 jugevents.showAndHide = function(selector, timeout, message){
 	$(selector).html("");
@@ -44,35 +65,25 @@ jugevents.store = function (storageid, input){
 	jugevents.storeValue(storageid, value);
 }
 
-jugevents.storeValue = function(storageid, value){
-	localStorage[storageid]=value;
-	console.log("stored "+value+" into localStorage['"+storageid+"']");
-} 
-
 jugevents.autoFollow = function(jugName){
     var url = jugevents.http.jugevents_ROOT_URL+"search.form?continent=&country=&jugName="+jugName+"&pastEvents=true&_pastEvents=on&orderByDate=desc"
-	var xhr = new XMLHttpRequest();
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4) { 
-			var regex = new RegExp("<a.href=\".jugevents.event.([0-9]+)\".*>","mgi");
-			var matches = xhr.responseText.match(regex);
-			if(matches.length > 0){
-				var lastEvent = matches[0];
-				var eventID = regex.exec(lastEvent)[1];
-				chrome.extension.sendMessage({action: "eventFollow", event: eventID}, function(response) {
-					console.log("call to background.js done");
-				});
-			}
+	$.get(url, function(data){
+		var regex = new RegExp("<a.href=\".jugevents.event.([0-9]+)\".*>","mgi");
+		var matches = data.match(regex);
+		if(matches.length > 0){
+			var lastEvent = matches[0];
+			var eventID = regex.exec(lastEvent)[1];
+			chrome.extension.sendMessage({action: "eventFollow", event: eventID}, function(response) {
+				console.log("call to background.js done");
+			});
 		}
-	}
-	xhr.open("GET", url, false);
-	xhr.send();
+	});
 }
 
 
-jugevents.save = function(){
-	jugevents.store(jugevents.localStorage.jugnameid,'jugName');
-	jugevents.showAndHide('#saved', 2000, "Options saved !");
+jugevents.save = function(jugName){
+	jugevents.storeValue(jugevents.localStorage.jugnameid,jugName);
+	//jugevents.showAndHide('#saved', 2000, "Options saved !");
 
 	setTimeout(function (){
 		chrome.extension.sendMessage(
@@ -82,7 +93,7 @@ jugevents.save = function(){
 			}
 		);
 	},10);
-	if($("#jugName").val()){
+	if(jugName){
 		jugevents.refreshEvents();
 	}
 	setTimeout(function(){
@@ -118,15 +129,18 @@ jugevents.restore = function(initFields){
 	var nbParticipants = localStorage[jugevents.localStorage.incrits];
 	console.log("Found nbParticipants="+nbParticipants+" in localStorage");
 	var previousValue = $('#nbparticipants').text();
-	if(nbParticipants){
+	if(nbParticipants !== "undefined"){
 		$('#nbparticipants').show();
-		if(parseInt(previousValue) != parseInt(nbParticipants) && !$('#nbparticipants').is(":focus")){
+		$('#nbParticipantsWarning').hide();
+		if(parseInt(previousValue) != parseInt(nbParticipants)){
 			$('#nbparticipants').text(nbParticipants);
 			$('#nbParticipantsContainer').toggleClass("normal");
 			$('#nbParticipantsContainer').toggleClass("returned");
 		}
 	}else{
 		$('#nbparticipants').hide();
+		$('#eventLink').attr("href",jugevents.http.EDIT_EVENT_URL+eventid+"#registrationFieldsDiv");
+		$('#nbParticipantsWarning').show();
 	}
 	
 	var title = localStorage[jugevents.localStorage.title];
@@ -136,7 +150,7 @@ jugevents.restore = function(initFields){
 		$('#detailsAuthor').text(jugName);
 		$('#detailsTitle').text(title);
 		$('#detailsDesc').popover('destroy');
-		$('#detailsDesc').popover({placement:'bottom', html:true, trigger:'hover', title:title, content:localStorage[jugevents.localStorage.desc]});
+		$('#detailsDesc').popover({placement:'right', html:true, trigger:'hover', title:title, content:localStorage[jugevents.localStorage.desc]});
 	}else{
 		$('#eventtitle').text("");
 	}
@@ -144,7 +158,7 @@ jugevents.restore = function(initFields){
 
 jugevents.refreshEvents = function(){
 	setTimeout(function(){
-		$('#updatestatsbutton').button('loading');
+		jugevents.notify(jugevents.eventsLoading);
 		/*
 		var eventsUrls = jugevents_ROOT_URL+"json.html?jugName="+jugname+"&pastEvents=true&order=desc";
 		*/
@@ -155,9 +169,7 @@ jugevents.refreshEvents = function(){
 			xhr.onreadystatechange = function() {
 			  if (xhr.readyState == 4) {
 				if(xhr.responseXML){
-					var events = xhr.responseXML.getElementsByTagName('row');
-					//$('#chart').hide();
-					
+					var events = xhr.responseXML.getElementsByTagName('row');					
 					var nbEvents = events.length;
 					
 					jugeventsdb.indexedDB.deleteEventsAndThen(function(){
@@ -181,17 +193,8 @@ jugevents.refreshEvents = function(){
 						}
 					});
 				}else{
-					var alert = "<div class=\"alert alert-error\">"
-								+ "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">×</button>" 
-								+ "<h4 class=\"alert-heading\">Mise à jour impossible</h4>"
-								+ "Une erreur est survenue lors de la mise à jour des données pour le ["
-								+ jugname
-								+"] peut être le JUG se nomme-t-il autrement sur jugevents ?"
-								+ "</div>"
-					
-					jugevents.showAndHide('#errorPanel', 0, alert);
-					$('#updatestatsbutton').button('reset');
 					console.error("No XML found for "+jugname);
+					jugevents.notify(jugevents.eventsLoadFailed, jugname);
 				}
 			  }
 			}
@@ -203,8 +206,8 @@ jugevents.refreshEvents = function(){
 
 jugevents.addLastEvent = function(date, title, nb){
 	jugeventsdb.indexedDB.addEvent(date, title, nb, function(){
+		jugevents.notify(jugevents.eventsStored);
 		console.log("Refreshing chart");
-		$('#updatestatsbutton').button('reset');
 		jugevents.loadEvents();
 	});
 }
@@ -232,56 +235,11 @@ jugevents.loadEvents = function(){
 				return eventA.date.getTime() - eventB.date.getTime()
 			};
 			events.sort(comparator);
-			jugevents.drawChart(events);
+			jugevents.notify(jugevents.eventsLoaded, events);
 		}
 	);
 }
 
-jugevents.drawChart = function(events){
-	var graph = new Dygraph(document.getElementById("canvaschart"),
-						events.map(function (event){ return [event.date,event.audience] }),
-						{colors:["rgb(81,163,81)"], 
-						fillGraph:true,
-						fillAlpha:0.5, 
-						displayAnnotations:true,
-						labels:["date","Participants"],
-						labelsDiv: document.getElementById('chartLabels'),
-						highlightCircleSize: 5,
-						strokeWidth: 2});   
-						
-	var convert = function(date){
-		var d = date.getDate();
-		var m = date.getMonth()+1;
-		var y = date.getFullYear();
-		return '' + y +''+ (m<=9?'0'+m:m) +''+ (d<=9?'0'+d:d);
-	}
-						
-	var annotations = graph.annotations();
-	events.forEach(function (event){
-		var x = convert(event.date);
-		var annotation = {
-			series : "Participants",
-			x : event.date.getTime(),
-			shortText : "",
-			text : event.title + " ("+event.audience+" registered)",
-			cssClass: "icon-flag event-annotation",
-			tickHeight:0
-		};
-		
-		annotations.push(annotation);
-		console.log("Added "+annotation+" x="+x);
-	});
-	graph.setAnnotations(annotations);
-	
-	//Display tooltip of chart with Bootstrap Tooltips
-	$('#canvaschart *[title]').tooltip();
-	
-	var audiences = events.map(function (event){ return event.audience });
-	$('#medparticipants').text(jugevents.Math.median(audiences));
-	$('#maxparticipants').text(Math.max.apply( Math, audiences));
-	$('#minparticipants').text(Math.min.apply( Math, audiences));
-	$('#avgparticipants').text(jugevents.Math.avg(audiences));
-}
 jugevents.onRequestReceived = function(request, sender, sendResponse){
 	if (request.action == "eventUpdated"){
 		console.log("Received an update on event values");

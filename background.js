@@ -23,7 +23,7 @@ background.updateBadge = function(){
 	if(chrome.browserAction){
 		var inscrits = localStorage[background.inscritsId];
 		var label = "";
-		if(inscrits){
+		if(inscrits !== "undefined"){
 			label = inscrits+"";
 		}
 		chrome.browserAction.setBadgeText({text:label});
@@ -39,13 +39,16 @@ background.clearBadge = function(){
 background.check = function(){
 	var id = localStorage[background.eventId];
 	if(id){
-		var xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() {
-		  if (xhr.readyState == 4) { 
-			var matches = xhr.responseText.match(/<div.class="participant">/mgi);
+		$.get(background.url+id, function(data){
+			var matches = data.match(/<div.class="participant">/mgi);
 			var inscrits;
 			if(matches){
 				inscrits = matches.length;
+			}else{
+				//warning
+				chrome.extension.sendMessage({action: "eventUpdated"}, function(response) {
+				  console.log("Updated participants number");
+				});
 			}
 			if(localStorage[background.inscritsId] != inscrits){
 				localStorage[background.inscritsId]=inscrits;
@@ -54,10 +57,8 @@ background.check = function(){
 				  console.log("Updated participants number");
 				});
 			}
-		  }
-		}
-		xhr.open("GET", background.url+id, false);
-		xhr.send();
+		 
+		});
 		
 		var xhr2 = new XMLHttpRequest();
 		xhr2.onreadystatechange = function() {

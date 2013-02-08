@@ -19,16 +19,6 @@
 							<p class="help-block"><span id="nomtooltip" class="badge" rel="tooltip" title="La casse n'est pas importante mais les espaces le sont">Nom <i class="icon-question-sign icon-white"></i></span> du JUG sur jugevents</p>
 						</div>
 					</div>
-					<div class="control-group"  style="display:none;">
-						<label for="id" class="control-label">Suivre un évènement</label>
-						<div class="controls">
-							<input id="id" type="text" class="input-small" placeholder="46430"></input>
-							<p class="help-block">
-								<span id="identifianttooltip" class="badge" rel="tooltip" title="Pour retourver cet identifiant, allez sur la page de l'évènement dans jugevents.org et récupérez le numéro en fin d'URL">Identifiant <i class="icon-question-sign  icon-white"></i></span> 
-							de l'évènement sur jugevents. Renseigner ce champ permet de voir en temps réel le nombre d'inscrits à cet évènement
-							</p>
-						</div>
-					</div>
 					<div class="control-group">
 						<div class="controls">
 							<div>
@@ -38,12 +28,37 @@
 						</div>
 					</div>
 					<div id="detailsEvent" class="container">
+						<h3>Next event</h3>
 						<div class="row">
-							<div id="detailsDesc" class="span6 well"><blockquote><p id="detailsTitle"></p><small id="detailsAuthor">Unknown</small></blockquote></div>
+							<div id="detailsDesc" class="span4 well"><blockquote><p id="detailsTitle"></p><small id="detailsAuthor">Unknown</small></blockquote></div>
 							<div class="span1"><a id="details" href="http://www.jugevents.org/" target="_blank">Details</a></div>
 							<div id="nbParticipantsContainer" class="span normal"><span id="nbparticipants" class="label label-important"></div>
+							<div id="nbParticipantsJugLeader" class="modal hide fade">
+							  <div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+								<h3>Follow registrations</h3>
+							  </div>
+							  <div class="modal-body">
+								<p>If you want to follow registration for your event, you'll need to make participants list public on jugevents.org</p>
+								<h2>How can I do that ?</h2>
+								<p>
+									<ol>
+										<li>Go to your <a  id="eventLink" href="#">event page</a></li>
+										<li>Check "Show Participants" options at page bottom <img src="showParticipants.png" class="img-polaroid"/></li>
+										<li>just wait a few seconds...</li>
+										<li>done !</li>
+									</ol>
+								</p>
+							  </div>
+							  <div class="modal-footer">
+								<a href="#" class="btn" data-dismiss="modal">Close</a>
+							  </div>
+							</div>
 							<div class="span1"><a id="participants" href="http://www.jugevents.org/" target="_blank">Participants</a></div>
 						</div> 
+					</div>
+					<div id="nbParticipantsWarning" class="alert alert-warning hide">
+						<strong>Warning ! </strong>Does event publish his participants list on jugevents.org ? <br/><br/>I'm a <strong>jugleader</strong> <button type="button" id="showParticipantTips" class="btn btn-warning btn-mini">give me more</button></a>
 					</div>
 				</div>
 			</div>
